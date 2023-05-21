@@ -1,0 +1,3 @@
+0|Eat|simple|True|none|20
+1|Drink|checklist|4|1|50
+2|Be Merry|habit|1|none|100
