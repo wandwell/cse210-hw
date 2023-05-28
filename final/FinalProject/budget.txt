@@ -1,0 +1,10 @@
+Housing|25
+Utilities|5
+Food|10
+Transport|10
+Health|5
+Insurance|10
+Personal|5
+Recreation|5
+Saving|10
+Giving|10
