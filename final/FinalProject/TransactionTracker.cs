@@ -6,12 +6,6 @@ public class TransactionTracker
     DateTime _begin;
     DateTime _end;
 
-    public TransactionTracker(string begin, string end)
-    {
-        _begin = DateTime.Parse(begin);
-        _end = DateTime.Parse(end);
-    }
-
     public void AddTransaction()
     {
         Console.Write("Enter 1 for Income and 2 for Expense: ");
@@ -128,6 +122,11 @@ public class TransactionTracker
                 Console.WriteLine($"{category.GetTitle()} | ${category.TotalAmount()}");   
             }
         }
+    }
+    public void SetDates(DateTime begin, DateTime end)
+    {
+        _begin = begin;
+        _end = end;
     }
 
 }   
