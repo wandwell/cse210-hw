@@ -11,24 +11,102 @@ public class Budget
 
     public void AddFixedExpense(Expense expense)
     {
-        _fixedExpenses.Add(expense);
+        bool alreadyExists = false;
+        foreach (Expense item in _fixedExpenses)
+        {
+            if (item.GetTitle() == expense.GetTitle())
+            {
+                alreadyExists = true;
+            }
+        }
+
+        if (alreadyExists == false)
+        {
+            _fixedExpenses.Add(expense);
+        }
     }
 
-   public void CreateCategories()
+    public void DisplayFixedExpenses()
+    {
+        foreach (Expense expense in _fixedExpenses)
+        {
+            expense.DisplayTransaction();
+        }
+    }
+
+    public void RemoveFixedExpense()
+    {
+        Console.Write("Which Expense do you want to remove from Budget? ");
+        string title = Console.ReadLine();
+
+        foreach(Expense expense in _fixedExpenses)
+        {
+            if (title == expense.GetTitle())
+            {
+                _fixedExpenses.Remove(expense);
+            }
+        }
+    }
+
+   public void LoadBudget()
    {
         string[] lines = System.IO.File.ReadAllLines("budget.txt");
         foreach(string line in lines)
         {
-            string[] parts = line.Split("|");
-            string title = parts[0];
-            string percent = parts[1];
-            int percentage = int.Parse(percent);
-            
-            Category category = new Category(title, "Expense");
-            _categories.Add(category);
-            _goalPercentages.Add(percentage);
+            if (line == lines[0])
+            {
+                string[] parts = line.Split("|");
+                string incomeString = parts[0];
+                string begDateString = parts[1];
+                string endDateString = parts[2];
+
+                _income = double.Parse(incomeString);
+                try
+                {
+                    _begin = DateTime.Parse(begDateString);
+                    _end = DateTime.Parse(endDateString);
+                }
+                catch(System.FormatException)
+                {
+                    _begin = DateTime.Now;
+                    _end = DateTime.Now;
+                }
+                
+            }
+            else
+            {
+                string[] parts = line.Split("|");
+                string title = parts[0];
+                string type = parts[1];
+                string goalPercentageString = parts[2];
+                string actualPercentageString = parts[3];
+                string goalAmountString = parts[4];
+                string fixedExpensesTotalString = parts[5];
+
+                int goalPercentage = int.Parse(goalPercentageString);
+                int actualPercentage = int.Parse(actualPercentageString);
+                double goalAmount = double.Parse(goalAmountString);
+                double fixedExpensesTotal = double.Parse(fixedExpensesTotalString);
+                
+                Category category = new Category(title, type, goalAmount, fixedExpensesTotal);
+                _categories.Add(category);
+                _goalPercentages.Add(goalPercentage);
+                _actualPercentages.Add(actualPercentage);
+            }
         }
    }
+
+   public void SaveBudget(string filename = "budget.txt")
+    {
+        using (StreamWriter outputFile = new StreamWriter(filename))
+        {
+            outputFile.WriteLine($"{_income}|{_begin}|{_end}");
+            for (int i = 0; i < _categories.Count(); i++)
+            {
+                outputFile.WriteLine($"{_categories[i].GetTitle()}|{_categories[i].GetType()}|{_goalPercentages[i]}|{_actualPercentages[i]}|{_categories[i].GetGoal()}|{_categories[i].GetFixedExpenseTotal()}");
+            }
+        }
+    }
 
    public void SortFixedExpenses()
     {
@@ -51,17 +129,16 @@ public class Budget
     {
         for(int i = 0; i < _categories.Count(); i ++)
         {
-           Category category = _categories[i];
-           double goalByPercentage = _income * (_goalPercentages[i] / 100); 
+           double goalByPercentage = _income * _goalPercentages[i] / 100; 
 
-            if (goalByPercentage >= category.GetGoal())
+            if (goalByPercentage > _categories[i].GetGoal())
             {
-                category.SetGoal(goalByPercentage);
+                _categories[i].SetGoal(goalByPercentage);
             }
 
-            double newPercentage = category.GetGoal() / _income;
+            double newPercentage = (_categories[i].GetGoal() / _income) * 100;
             newPercentage = Math.Round(newPercentage);
-            _actualPercentages.Add((int)newPercentage);
+            _actualPercentages[i] = ((int)newPercentage);
         }
     }
 
@@ -78,11 +155,7 @@ public class Budget
         int choice = -1;
         do
         {
-            for(int i = 0; i < _categories.Count(); i ++)
-            {
-                Console.WriteLine($"{i + 1}: {_categories[i]} | ${_categories[i].GetGoal()} | {_actualPercentages[i]}");
-            }
-            Console.WriteLine($"Projected Income: {_income} | Current Budget Total: {_outcomeTotal}");
+            DisplayBudget();
             Console.Write("Which category do you want to edit?(Enter 0 to Exit) ");
 
             string userinput = Console.ReadLine();
@@ -102,5 +175,27 @@ public class Budget
             }
             
         }while (choice != 0);
+    }
+
+    public void SetDates(DateTime begin, DateTime end)
+    {
+        _begin = begin;
+        _end = end;
+    }
+
+    public void DisplayBudget()
+    {
+        Console.WriteLine($"Budget {_begin.Date} - {_end.Date}");
+
+        for(int i = 0; i < _categories.Count(); i ++)
+            {
+                Console.WriteLine($"{_categories[i].GetTitle()} | ${_categories[i].GetGoal()} | {_actualPercentages[i]}% of Income");
+            }
+        Console.WriteLine($"Projected Income: {_income} | Current Budget Total: {_outcomeTotal}");
+    }           
+
+    public void SetIncome(double income)
+    {
+        _income = income;
     }
 }

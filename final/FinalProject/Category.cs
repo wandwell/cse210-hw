@@ -4,12 +4,19 @@ public class Category
     private string _type;
     private double _goal;
     private double _fixedExpensesTotal;
-    List<Transaction> _transactions;
+    List<Transaction> _transactions = new List<Transaction>();
 
     public Category(string title, string type)
     {
         _title = title;
         _type = type;
+    }
+    public Category(string title, string type, double goal, double fixedExpensesTotal)
+    {
+        _title = title;
+        _type = type;
+        _goal = goal;
+        _fixedExpensesTotal = fixedExpensesTotal;
     }
 
     public string GetTitle()
@@ -48,6 +55,19 @@ public class Category
         foreach (Transaction transaction in _transactions)
         {
             total += transaction.GetAmount();
+        }
+        return total;
+    }
+
+    public double TimeLimitedAmount(DateTime begin, DateTime end)
+    {
+        double total = 0;
+        foreach(Transaction transaction in _transactions)
+        {
+            if (transaction.GetDate() >= begin && transaction.GetDate() <= end)
+            {
+                total += transaction.GetAmount();
+            }
         }
         return total;
     }

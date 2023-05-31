@@ -2,12 +2,17 @@ public class Expense : Transaction
 {
     private bool _isFixed = false;
 
-    public Expense(string category, double amount, string date)
-    :base(category, amount, date){}
+    public Expense(string title, string category, double amount, string date)
+    :base(title, category, amount, date){}
 
     public void SetIsFixed(bool isFixed)
     {
         _isFixed = isFixed;
+    }
+
+    public bool GetIsFixed()
+    {
+        return _isFixed;
     }
 
     public override void DisplayTransaction()
@@ -18,7 +23,7 @@ public class Expense : Transaction
         {
             isFixedString = "Yes";
         }
-        Console.WriteLine($"{base._category} | {base._date} | {base._amount} | Fixed: {isFixedString}");
+        Console.WriteLine($"{base._title} | {base._category} | {base._date} | {base._amount} | Fixed: {isFixedString}");
     }
 
 }

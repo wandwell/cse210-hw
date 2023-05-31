@@ -6,34 +6,91 @@ public class TransactionTracker
     DateTime _begin;
     DateTime _end;
 
-    public void AddTransaction()
+    public void AddCategory(Category category, Transaction transaction)
+    {
+        bool doesExist = false;
+
+        if (_categories.Count() == 0)
+            {
+                category.AddTransaction(transaction);
+                _categories.Add(category);
+                doesExist = true;
+            }
+
+        for(int j = 0; j < _categories.Count(); j ++)
+        {   
+            if (_categories[j].GetTitle() == category.GetTitle())
+            {
+                _categories[j].AddTransaction(transaction);
+                doesExist =true;
+            }
+        }
+
+        if (doesExist == false)
+        {
+            category.AddTransaction(transaction);
+            _categories.Add(category);
+        }
+        
+    }
+    public void AddTransaction(Transaction transaction)
+    {
+        Category category = new Category("title", "type");
+
+        if (transaction is Income)
+        {
+            Income income = (Income)transaction;
+            category = new Category(income.GetTitle(), "Income");
+
+            AddCategory(category, income);
+            _transactions.Add(income);
+
+        }   
+        else
+        {
+            Expense expense = (Expense)transaction;
+            category = new Category(expense.GetTitle(), "Expense");
+           
+            AddCategory(category, expense);
+            _transactions.Add(expense);
+        }   
+    }
+
+    public void AddTransaction(AssetTracker assets)
     {
         Console.Write("Enter 1 for Income and 2 for Expense: ");
         string userinput = Console.ReadLine();
         int i = int.Parse(userinput);
 
-        Console.Write("Category: ");
+        Console.Write("Title: ");
         string title = Console.ReadLine();
+
+        Console.Write("Category: ");
+        string categoryString = Console.ReadLine();
 
         Console.Write("Date: ");
         string date = Console.ReadLine();
 
-        Console.Write("Amount: ");
+        Console.Write("Amount: $");
         userinput = Console.ReadLine();
         double amount = double.Parse(userinput);
 
         Category  category = new Category(title, "type");
         if (i == 1)
         {
-            Income income = new Income(title, amount, date);
+            Income income = new Income(title, categoryString, amount, date);
             category = new Category(title, "Income");
+
+            AddCategory(category, income);
             _transactions.Add(income);
+            assets.AddMoney(amount);
         }   
         else
         {
-            Expense expense = new Expense(title,amount,date);
+            Expense expense = new Expense(title, categoryString, amount, date);
             category = new Category(title, "Expense");
-
+            assets.WithdrawMoney(amount);
+            
             Console.Write("Enter Y if this is a fixed Expense: ");
             userinput = Console.ReadLine();
 
@@ -43,18 +100,9 @@ public class TransactionTracker
                 _fixedExpenses.Add(expense);
             }
             
+            AddCategory(category,expense);
             _transactions.Add(expense);
-        }
-
-        try
-        {
-            _categories.IndexOf(category);
-        }
-        catch
-        {
-            _categories.Add(category);
-        }
-
+        }   
     }
 
     public List<Transaction> SortByDate()
@@ -63,7 +111,7 @@ public class TransactionTracker
 
         foreach (Transaction transaction in _transactions)
         {
-            if (transaction.GetDate() >= _begin && transaction.GetDate() >= _end)
+            if (transaction.GetDate() >= _begin && transaction.GetDate() <= _end)
             {
                 sortedList.Add(transaction);
             }
@@ -86,40 +134,48 @@ public class TransactionTracker
         }
     }
 
-    public void SortByCategory()
-    {
-        foreach (Transaction transaction in SortByDate())
-        {
-            foreach (Category category in _categories)
-            {
-                if (transaction.GetCategory() == category.GetTitle())
-                {
-                    category.AddTransaction(transaction);
-                }
-            }
-        }
-    }
-
     public void DisplayIncomeData()
     {
-        Console.WriteLine("Income: ");
+        double total = 0;
+
+        foreach (Transaction transaction in _transactions)
+        {
+            if(transaction is Income && transaction.GetDate() >= _begin && transaction.GetDate() <= _end)
+            {
+                total += transaction.GetAmount();
+            }
+        }
+
+        Console.WriteLine($"Income: ${total}");
+        
         foreach (Category category in _categories)
         {
             if (category.GetType() == "Income")
             {
-                Console.WriteLine($"{category.GetTitle()} | ${category.TotalAmount()}");   
+                Console.WriteLine($"{category.GetTitle()} | ${category.TimeLimitedAmount(_begin, _end)}");   
             }
         }
     }
 
     public void DisplayExpenseData()
     {
-        Console.WriteLine("Expense: ");
+        double total = 0;
+
+        foreach (Transaction transaction in _transactions)
+        {
+            if(transaction is Expense  && transaction.GetDate() >= _begin && transaction.GetDate() <= _end)
+            {
+                total += transaction.GetAmount();
+            }
+        }
+
+        Console.WriteLine($"Expense: ${total}");
+
         foreach (Category category in _categories)
         {
             if (category.GetType() == "Expense")
             {
-                Console.WriteLine($"{category.GetTitle()} | ${category.TotalAmount()}");   
+                Console.WriteLine($"{category.GetTitle()} | ${category.TimeLimitedAmount(_begin, _end)}");   
             }
         }
     }
@@ -127,6 +183,56 @@ public class TransactionTracker
     {
         _begin = begin;
         _end = end;
+    }
+
+    public void LoadTransactions()
+   {
+        string[] lines = System.IO.File.ReadAllLines("transactions.txt");
+        foreach(string line in lines)
+        {
+            string[] parts = line.Split("|");
+            string title = parts[0];
+            string category = parts[1];
+            string amountString = parts[2];
+            string date = parts[3];
+            string isFixedString = parts[4];
+
+            double amount = double.Parse(amountString);
+
+            if (isFixedString != "-")
+            {
+                bool isFixed = bool.Parse(isFixedString);
+
+                Expense expense = new Expense(title, category, amount, date);
+                expense.SetIsFixed(isFixed);
+                AddTransaction(expense);
+            }
+            else
+            {
+                Income income = new Income(title,category, amount, date);
+                AddTransaction(income);
+            }
+        }
+    }
+   
+
+   public void SaveTransactions(string filename = "transactions.txt")
+    {
+        using (StreamWriter outputFile = new StreamWriter(filename))
+        {
+            for (int i = 0; i < _transactions.Count(); i++)
+            {
+                if(_transactions[i] is Expense)
+                {
+                    Expense expense = (Expense)_transactions[i];
+                    outputFile.WriteLine($"{expense.GetTitle()}|{expense.GetCategory()}|{expense.GetAmount()}|{expense.GetDate().ToString()}|{expense.GetIsFixed()}");   
+                }
+                else
+                {
+                    outputFile.WriteLine($"{_transactions[i].GetTitle()}|{_transactions[i].GetCategory()}|{_transactions[i].GetAmount()}|{_transactions[i].GetDate().ToString()}|-");   
+                }
+            }
+        }
     }
 
 }   
