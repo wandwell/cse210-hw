@@ -8,7 +8,7 @@ class Program
 
         main.AddOption("Add Transaction");
         main.AddOption("Spending Tracker");
-        main.AddOption("Budget");
+        main.AddOption("Monthly Budget");
         main.AddOption("Debt Tracker");
         main.AddOption("Assets");
         main.AddOption("Quit");
@@ -67,8 +67,8 @@ class Program
             {
                 Menu budgetMenu = new Menu();
 
-                budgetMenu.AddOption("Create Budget");
-                budgetMenu.AddOption("View Budget");
+                budgetMenu.AddOption("Create Monthly Budget");
+                budgetMenu.AddOption("View Monthly Budget");
                 budgetMenu.AddOption("Remove Fixed Expense from Budget");
                 budgetMenu.AddOption("Return to Main Menu");
                 int option = -1;
@@ -79,23 +79,14 @@ class Program
 
                     if (option == 0)
                     {
-                        Console.Write("Pick a beginning date: ");
+                        Console.Write("What is your projected monthly income? $");
                         string userinput = Console.ReadLine();
-                        DateTime begin = DateTime.Parse(userinput);
-
-                        Console.Write("Pick an end date: ");
-                        userinput = Console.ReadLine();
-                        DateTime end = DateTime.Parse(userinput);
-
-                        budget.SetDates(begin, end);
-
-                        Console.Write("What is your projected income for this period? $");
-                        userinput = Console.ReadLine();
                         double income = double.Parse(userinput);
                         budget.SetIncome(income);
 
                         budget.SortFixedExpenses();
                         budget.AllocatebyPercentage();
+                        budget.SetBudgetOutcome();
                     }
 
                     else if (option == 1)
