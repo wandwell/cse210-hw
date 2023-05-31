@@ -16,22 +16,23 @@ public class TransactionTracker
                 _categories.Add(category);
                 doesExist = true;
             }
-
-        for(int j = 0; j < _categories.Count(); j ++)
-        {   
-            if (_categories[j].GetTitle() == category.GetTitle())
-            {
-                _categories[j].AddTransaction(transaction);
-                doesExist =true;
-            }
-        }
-
-        if (doesExist == false)
+        else
         {
-            category.AddTransaction(transaction);
-            _categories.Add(category);
-        }
-        
+            for(int j = 0; j < _categories.Count(); j ++)
+            {   
+                if (_categories[j].GetTitle() == category.GetTitle())
+                {
+                    _categories[j].AddTransaction(transaction);
+                    doesExist =true;
+                }
+            }
+
+            if (doesExist == false)
+            {
+                category.AddTransaction(transaction);
+                _categories.Add(category);
+            }
+        }        
     }
     public void AddTransaction(Transaction transaction)
     {

@@ -2,3 +2,4 @@ Salary|Salary|800|5/23/2023 12:00:00 AM|-
 Grocery|Food|120|4/23/2023 12:00:00 AM|False
 Car Insurance|Insurance|120|5/23/2023 12:00:00 AM|True
 Salary|Salary|598|4/29/2023 12:00:00 AM|-
+Gas|Transportation|56|5/31/2023 12:00:00 AM|False

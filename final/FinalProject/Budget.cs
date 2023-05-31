@@ -6,8 +6,6 @@ public class Budget
     private List<int> _actualPercentages = new List<int>();
     private List<Expense> _fixedExpenses = new List<Expense>();
     private double _outcomeTotal;
-    private DateTime _begin;
-    private DateTime _end;
 
     public void AddFixedExpense(Expense expense)
     {
@@ -55,23 +53,7 @@ public class Budget
         {
             if (line == lines[0])
             {
-                string[] parts = line.Split("|");
-                string incomeString = parts[0];
-                string begDateString = parts[1];
-                string endDateString = parts[2];
-
-                _income = double.Parse(incomeString);
-                try
-                {
-                    _begin = DateTime.Parse(begDateString);
-                    _end = DateTime.Parse(endDateString);
-                }
-                catch(System.FormatException)
-                {
-                    _begin = DateTime.Now;
-                    _end = DateTime.Now;
-                }
-                
+                _income = double.Parse(line);
             }
             else
             {
@@ -100,7 +82,7 @@ public class Budget
     {
         using (StreamWriter outputFile = new StreamWriter(filename))
         {
-            outputFile.WriteLine($"{_income}|{_begin}|{_end}");
+            outputFile.WriteLine($"{_income}");
             for (int i = 0; i < _categories.Count(); i++)
             {
                 outputFile.WriteLine($"{_categories[i].GetTitle()}|{_categories[i].GetType()}|{_goalPercentages[i]}|{_actualPercentages[i]}|{_categories[i].GetGoal()}|{_categories[i].GetFixedExpenseTotal()}");
@@ -177,16 +159,8 @@ public class Budget
         }while (choice != 0);
     }
 
-    public void SetDates(DateTime begin, DateTime end)
+    public void DisplayBudget()    
     {
-        _begin = begin;
-        _end = end;
-    }
-
-    public void DisplayBudget()
-    {
-        Console.WriteLine($"Budget {_begin.Date} - {_end.Date}");
-
         for(int i = 0; i < _categories.Count(); i ++)
             {
                 Console.WriteLine($"{_categories[i].GetTitle()} | ${_categories[i].GetGoal()} | {_actualPercentages[i]}% of Income");

@@ -1,1 +1,12 @@
-0|1/1/0001 12:00:00 AM|1/1/0001 12:00:00 AM
+2000
+Housing|Expense|25|25|500|0
+Utilities|Expense|5|5|100|0
+Insurance|Expense|10|10|200|0
+Health|Expense|5|5|100|0
+Transportation|Expense|10|10|200|0
+Food|Expense|10|10|200|0
+Personal|Expense|5|5|100|0
+Recreation|Expense|5|5|100|0
+Misc|Expense|5|5|100|0
+Giving|Expense|10|10|200|0
+Saving|Expense|10|10|200|0
